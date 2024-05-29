@@ -5,10 +5,10 @@ const { sendResponseError } = require("../middleware/middleware");
 const verifyUser = async (req, res, next) => {
   const { authorization } = req.headers;
   if (!authorization) {
-    sendResponseError(401, "You are not authorized ", res);
+    sendResponseError(401, "You are not authorized1", res);
     return;
   } else if (!authorization.startsWith("Bearer ")) {
-    sendResponseError(401, "You are not authorized ", res);
+    sendResponseError(401, "You are not authorized2", res);
     return;
   }
 
@@ -26,7 +26,7 @@ const verifyUser = async (req, res, next) => {
     }
   } catch (err) {
     console.log("Error ", err);
-    sendResponseError(400, `Error ${err}`, res);
+    sendResponseError(400, `Error ${err.message}`, res);
   }
 };
 
@@ -56,7 +56,7 @@ const verifyAdmin = async (req, res, next) => {
     }
   } catch (err) {
     console.log("Error ", err);
-    sendResponseError(400, `Error ${err}`, res);
+    sendResponseError(400, `Error ${err.message}`, res);
   }
 };
 

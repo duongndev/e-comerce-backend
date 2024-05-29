@@ -18,7 +18,10 @@ const addToCart = asyncHandler(async (req, res) => {
     const product = await Product.findById(productId);
 
     if (!product) {
-      sendResponseError(404, "Product not found", res);
+      sendResponseError(404, {
+        status: "fail",
+        message: "Product not found",
+      }, res);
       return;
     }
 
@@ -46,23 +49,29 @@ const addToCart = asyncHandler(async (req, res) => {
     );
     await cart.save();
 
-    res.json({
+    res.status(200).json({
       status: "success",
-      message: "Product added to cart",
+      message: "Item added to cart successfully",
       data: cart,
     });
   } catch (error) {
-    sendResponseError(500, error.message, res);
+    sendResponseError(500,{
+      status: "fail",
+      message: error.message,
+    }, res);
   }
 });
 
 const updateQuantityCart = asyncHandler(async (req, res) => {
-  const { userId, productId, quantity } = req.body;
+  const { idCart, userId, productId, quantity } = req.body;
   try {
-    const cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ userId: userId, _id: idCart });
 
     if (!cart) {
-      sendResponseError(404, "Cart not found", res);
+      sendResponseError(404, {
+        status: "fail",
+        message: "Cart not found",
+      }, res);
       return;
     }
 
@@ -71,7 +80,10 @@ const updateQuantityCart = asyncHandler(async (req, res) => {
     );
 
     if (!item) {
-      sendResponseError(404, "Item not found in cart", res);
+      sendResponseError(404, {
+        status: "fail",
+        message: "Item not found in cart",
+      }, res);
       return;
     }
 
@@ -83,11 +95,26 @@ const updateQuantityCart = asyncHandler(async (req, res) => {
     );
     await cart.save();
 
-    res.json({
+    res.status(200).json({
       status: "success",
-      message: "Quantity updated in cart",
+      message: "Quantity updated successfully",
       data: cart,
     });
+  } catch (error) {
+    sendResponseError(500, error.message, res);
+  }
+});
+
+const getCartByIdCart = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const cart = await Cart.findById(id);
+    if (!cart) {
+      sendResponseError(404, "Cart not found", res);
+      return;
+    }
+    res.json(cart);
   } catch (error) {
     sendResponseError(500, error.message, res);
   }
@@ -98,17 +125,19 @@ const getCart = asyncHandler(async (req, res) => {
   try {
     const cart = await Cart.findOne({ userId: id });
     if (!cart) {
-      sendResponseError(404, "Cart not found", res);
+      sendResponseError(404, {
+        status: "fail",
+        message: "Cart not found",
+      }, res);
       return;
     }
 
-    res.json({
-      status: "success",
-      message: "Cart fetched successfully",
-      data: cart,
-    });
+    res.status(200).json(cart);
   } catch (error) {
-    sendResponseError(500, error.message, res);
+    sendResponseError(500, {
+      status: "fail",
+      message: error.message,
+    }, res);
   }
 });
 
@@ -119,7 +148,10 @@ const deleteItemCart = asyncHandler(async (req, res) => {
     const cart = await Cart.findOne({ userId });
 
     if (!cart) {
-      sendResponseError(404, "Cart not found", res);
+      sendResponseError(404, {
+        status: "fail",
+        message: "Cart not found",
+      }, res);
       return;
     }
 
@@ -134,10 +166,33 @@ const deleteItemCart = asyncHandler(async (req, res) => {
 
     await cart.save();
 
-    res.json({
+    res.status(200).json({
       status: "success",
-      message: "Item deleted from cart",
-      data: cart,
+      message: "Item deleted successfully",
+      cart,
+    });
+  } catch (error) {
+    sendResponseError(500, {
+      status: "fail",
+      message: error.message,
+    }, res);
+  }
+});
+
+const deleteCart = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    const cart = await Cart.findById(id);
+    if (!cart) {
+      sendResponseError(404, "Cart not found", res);
+      return;
+    }
+
+    await Cart.findByIdAndDelete(id);
+
+    res.status(200).json({
+      status: "success",
+      message: "Cart deleted successfully",
     });
   } catch (error) {
     sendResponseError(500, error.message, res);
@@ -148,5 +203,6 @@ module.exports = {
   addToCart,
   updateQuantityCart,
   getCart,
+  getCartByIdCart,
   deleteItemCart,
 };

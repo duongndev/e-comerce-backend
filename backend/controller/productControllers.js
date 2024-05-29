@@ -3,6 +3,7 @@ const cloudinary = require("cloudinary");
 const fs = require("fs/promises");
 const { sendResponseError } = require("../middleware/middleware");
 const asyncHandler = require("express-async-handler");
+const Category = require("../models/Category");
 
 const createProduct = asyncHandler(async (req, res) => {
   const { name_product, description, price, categoryId, countInStock } =
@@ -44,11 +45,11 @@ const createProduct = asyncHandler(async (req, res) => {
       imageUrls: imageUrls,
     });
     await product.save();
-    res.json({
+    res.status(201).json({
       status: "success",
       message: "Product created successfully",
       data: product,
-    });
+    })
   } catch (error) {
     sendResponseError(500, error.message, res);
   }
@@ -141,9 +142,9 @@ const deleteProduct = asyncHandler(async (req, res) => {
 const getAllProducts = asyncHandler(async (req, res) => {
   try {
     const products = await Product.find({});
-    res.status(res.statusCode).json({
-      status: true,
-      message: "Products fetched successfully",
+    res.status(200).json({
+      status: "success",
+      message: "Get all products successfully",
       data: products,
     });
   } catch (error) {
@@ -161,14 +162,35 @@ const getProductById = asyncHandler(async (req, res) => {
       return;
     }
 
-    res.status(200).json({
-      status: "success",
-      message: "Product fetched successfully",
-      data: product,
-    });
+    res.status(200).json(product);
   } catch (error) {
     sendResponseError(500, `Error ${error.message}`, res);
   }
+});
+
+
+
+const getProductByCategoryId = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    const products = await Product.find({ categoryId: id });
+    res.status(200).json({
+      status: "success",
+      message: "Get product by categoryId successfully",
+      data: products,
+    });
+  } catch (error) {
+    res.json({
+      status: "fail",
+      message: error.message,
+    });
+  }
+});
+
+// 
+const createProductSubCategory = asyncHandler(async (req, res) => {
+  const { name_product, description, price, categoryId, idSubCategory, countInStock } = req.body;
+  
 });
 
 module.exports = {
@@ -177,4 +199,5 @@ module.exports = {
   deleteProduct,
   getAllProducts,
   getProductById,
+  getProductByCategoryId
 };

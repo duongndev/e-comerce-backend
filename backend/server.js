@@ -27,7 +27,6 @@ app.use(logger("dev"));
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRouter");
 const userRoutes = require("./routes/userRoutes");
-// const cartRoutes = require("./routes/cartRoutes");
 const cartRoutes = require("./routes/cartRouter");
 const authRoutes = require("./routes/authRouter");
 

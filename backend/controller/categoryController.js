@@ -3,6 +3,7 @@ const cloudinary = require("cloudinary");
 const fs = require("fs/promises");
 const { sendResponseError } = require("../middleware/middleware");
 const asyncHandler = require("express-async-handler");
+const Product = require("../models/Product");
 
 const createCategory = asyncHandler(async (req, res) => {
   const { nameCate } = req.body;
@@ -135,13 +136,22 @@ const deleteCategory = asyncHandler(async (req, res) => {
     if (imageId) {
       await cloudinary.v2.uploader.destroy(imageId);
     }
-    res.json({
-      status: "success",
-      message: "Category deleted successfully",
-      data: category,
-    });
+    res.json(category);
   } catch (error) {
     sendResponseError(500, error.message, res);
+  }
+});
+
+const getProductByCategory = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    const products = await Product.find({ categoryId: id });
+    res.json(products);
+  } catch (error) {
+    res.json({
+      status: "fail",
+      message: error.message,
+    });
   }
 });
 
@@ -151,4 +161,5 @@ module.exports = {
   deleteCategory,
   getAllCategories,
   getCategoryById,
+  getProductByCategory,
 };

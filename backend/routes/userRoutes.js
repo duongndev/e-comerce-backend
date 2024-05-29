@@ -1,11 +1,15 @@
 const express = require('express')
 const {
-  getProfile
+  getProfile,
+  getAllUsers,
 } = require('../controller/user.controller')
 const {verifyUser} = require('../middleware/authMiddleware')
 const router = express.Router()
 
 
-router.route('/me').get([verifyUser], getProfile)
+
+router.get('/', getAllUsers)
+
+router.get('/me', [verifyUser], getProfile)
 
 module.exports = router

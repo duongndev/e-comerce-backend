@@ -1,5 +1,5 @@
 const sendResponseError = (statusCode, msg, res) => {
-  res.status(statusCode || 400).send(!!msg ? msg : "Invalid input !!");
+  res.status(statusCode || 400).json(!!msg ? msg : "Invalid input !!");
 };
 function notFound(req, res, next) {
   res.status(404);

@@ -7,12 +7,14 @@ const {
 } = require("../controller/cartController");
 const { verifyUser } = require("../middleware/authMiddleware");
 
-router.post("/", verifyUser, addToCart);
+router.get("/", getCart);
 
-router.put("/:id", verifyUser, updateQuantityCart);
+router.post("/", addToCart);
 
-router.get("/:id", verifyUser, getCart);
+router.put("/:id", [verifyUser], updateQuantityCart);
 
-router.delete("/remove", verifyUser, deleteItemCart);
+router.get("/user/:id", [verifyUser], getCart);
+
+router.delete("/remove", [verifyUser], deleteItemCart);
 
 module.exports = router;
