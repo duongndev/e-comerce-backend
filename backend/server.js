@@ -30,13 +30,13 @@ const userRoutes = require("./routes/userRoutes");
 const cartRoutes = require("./routes/cartRouter");
 const authRoutes = require("./routes/authRouter");
 
-const api = "/api/v1";
+const api = "/api";
 
-app.use(`${api}/categories`, categoryRoutes);
-app.use(`${api}/products`, productRoutes);
-app.use(`${api}/users`, userRoutes);
-app.use(`${api}/cart`, cartRoutes);
-app.use(`${api}/auth`, authRoutes);
+app.use(`/categories`, categoryRoutes);
+app.use(`/products`, productRoutes);
+app.use(`/users`, userRoutes);
+app.use(`/cart`, cartRoutes);
+app.use(`/auth`, authRoutes);
 
 app.get("*", (req, res) => {
   res.json({ message: "API running..." });
