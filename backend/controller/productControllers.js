@@ -36,6 +36,14 @@ const createProduct = asyncHandler(async (req, res) => {
       sendResponseError(400, "Please add all fields", res);
       return;
     }
+
+    const category = await Category.findById(categoryId);
+
+    if (!category) {
+      sendResponseError(404, "Category not found", res);
+      return;
+    }
+    
     const product = await Product.create({
       name_product,
       description,
@@ -49,7 +57,7 @@ const createProduct = asyncHandler(async (req, res) => {
       status: "success",
       message: "Product created successfully",
       data: product,
-    })
+    });
   } catch (error) {
     sendResponseError(500, error.message, res);
   }
@@ -158,39 +166,69 @@ const getProductById = asyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.id);
 
     if (!product) {
-      sendResponseError(404, "Product not found", res);
+      sendResponseError(404, {
+        status: "fail",
+        message: "Product not found",
+      }, res);
       return;
     }
 
-    res.status(200).json(product);
+    res.status(200).json({
+      status: "success",
+      message: "Get product successfully",
+      data: product,
+    });
   } catch (error) {
     sendResponseError(500, `Error ${error.message}`, res);
   }
 });
 
-
-
 const getProductByCategoryId = asyncHandler(async (req, res) => {
-  const { id } = req.params;
   try {
-    const products = await Product.find({ categoryId: id });
+
+    const category = await Category.findOne({ nameCate: req.params.name });
+
+    if (!category) {
+      sendResponseError(404,{
+        status: "fail",
+        message: "Category not found",
+      }, res);
+      return;
+    }
+    
+    const products = await Product.find({ categoryId: category._id });
+
+    if (!products) {
+      sendResponseError(404,{
+        status: "fail",
+        message: "Products not found",
+      }, res);
+      return;
+    }
+  
     res.status(200).json({
       status: "success",
-      message: "Get product by categoryId successfully",
+      message: "Get all products successfully",
       data: products,
     });
   } catch (error) {
-    res.json({
+    sendResponseError(500, {
       status: "fail",
       message: error.message,
-    });
+    }, res);
   }
 });
 
-// 
+//
 const createProductSubCategory = asyncHandler(async (req, res) => {
-  const { name_product, description, price, categoryId, idSubCategory, countInStock } = req.body;
-  
+  const {
+    name_product,
+    description,
+    price,
+    categoryId,
+    idSubCategory,
+    countInStock,
+  } = req.body;
 });
 
 module.exports = {
@@ -199,5 +237,5 @@ module.exports = {
   deleteProduct,
   getAllProducts,
   getProductById,
-  getProductByCategoryId
+  getProductByCategoryId,
 };

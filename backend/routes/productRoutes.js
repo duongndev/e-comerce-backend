@@ -14,7 +14,7 @@ const upload = require("../middleware/multerMiddleware");
 
 router.get("/", getAllProducts);
 
-router.get("/category/:id", getProductByCategoryId);
+router.get("/category/:name", getProductByCategoryId);
 
 router.post("/", upload.array("images", 5), createProduct);
 
