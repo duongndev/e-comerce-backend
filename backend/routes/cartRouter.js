@@ -9,7 +9,7 @@ const { verifyUser } = require("../middleware/authMiddleware");
 
 router.get("/", getCart);
 
-router.post("/", addToCart);
+router.post("/", [verifyUser], addToCart);
 
 router.put("/:id", [verifyUser], updateQuantityCart);
 

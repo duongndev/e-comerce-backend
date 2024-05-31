@@ -25,22 +25,14 @@ const addToCart = asyncHandler(async (req, res) => {
       return;
     }
 
-    const existingItem = cart.items.find(
-      (item) => item.product.toString() === productId
+    const item = cart.items.find(
+      (item) => item.productId.toString() === productId
     );
 
-    let imgPrd = product.imageUrls[0].secure_url;
-
-    if (existingItem) {
-      existingItem.quantity += quantity;
+    if (item) {
+      item.quantity += quantity;
     } else {
-      cart.items.push({
-        productId: productId,
-        price: product.price,
-        name_product: product.name_product,
-        img: imgPrd,
-        quantity,
-      });
+      cart.items.push({ productId, quantity, price: product.price, image: product.imageUrls[0], name_product: product.name_product });
     }
 
     cart.totalAmount = cart.items.reduce(
@@ -49,15 +41,12 @@ const addToCart = asyncHandler(async (req, res) => {
     );
     await cart.save();
 
-    res.status(200).json({
-      status: "success",
-      message: "Item added to cart successfully",
-      data: cart,
-    });
+    res.status(200).json(cart);
   } catch (error) {
     sendResponseError(500,{
       status: "fail",
       message: error.message,
+      stack: error.stack,
     }, res);
   }
 });
@@ -131,6 +120,14 @@ const getCart = asyncHandler(async (req, res) => {
       }, res);
       return;
     }
+
+    // Calculate total amount
+    cart.totalAmount = cart.items.reduce(
+      (acc, item) => acc + item.quantity * item.price,
+      0
+    );
+
+    await cart.save();
 
     res.status(200).json(cart);
   } catch (error) {
