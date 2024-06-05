@@ -11,43 +11,64 @@ const addToCart = asyncHandler(async (req, res) => {
     if (!cart) {
       cart = new Cart({
         userId,
-        products: [{ userId, items: [] }],
+        itemsCart: [],
+        totalAmount: 0,
       });
     }
 
     const product = await Product.findById(productId);
 
     if (!product) {
-      sendResponseError(404, {
-        status: "fail",
-        message: "Product not found",
-      }, res);
+      sendResponseError(
+        404,
+        {
+          status: "fail",
+          message: "Product not found",
+        },
+        res
+      );
       return;
     }
 
-    const item = cart.items.find(
+    const item = cart.itemsCart.find(
       (item) => item.productId.toString() === productId
     );
 
     if (item) {
-      item.quantity += quantity;
+      item.quantity = item.quantity + quantity;
     } else {
-      cart.items.push({ productId, quantity, price: product.price, image: product.imageUrls[0], name_product: product.name_product });
+      // add item to cart
+      cart.itemsCart.push({
+        productId: productId,
+        quantity: quantity,
+        price: product.price,
+        name: product.name_product,
+        image: product.imageUrls[0].secure_url,
+      });
     }
 
-    cart.totalAmount = cart.items.reduce(
-      (acc, item) => acc + item.quantity * product.price,
+    cart.totalAmount = cart.itemsCart.reduce(
+      (acc, item) => acc + item.quantity * item.price,
       0
     );
+
     await cart.save();
 
-    res.status(200).json(cart);
+    res.status(200).json({
+      status: "success",
+      message: "Item added to cart successfully",
+      data: cart,
+    });
   } catch (error) {
-    sendResponseError(500,{
-      status: "fail",
-      message: error.message,
-      stack: error.stack,
-    }, res);
+    sendResponseError(
+      500,
+      {
+        status: "fail",
+        message: error.message,
+        stack: error.stack,
+      },
+      res
+    );
   }
 });
 
@@ -57,10 +78,14 @@ const updateQuantityCart = asyncHandler(async (req, res) => {
     const cart = await Cart.findOne({ userId: userId, _id: idCart });
 
     if (!cart) {
-      sendResponseError(404, {
-        status: "fail",
-        message: "Cart not found",
-      }, res);
+      sendResponseError(
+        404,
+        {
+          status: "fail",
+          message: "Cart not found",
+        },
+        res
+      );
       return;
     }
 
@@ -69,10 +94,14 @@ const updateQuantityCart = asyncHandler(async (req, res) => {
     );
 
     if (!item) {
-      sendResponseError(404, {
-        status: "fail",
-        message: "Item not found in cart",
-      }, res);
+      sendResponseError(
+        404,
+        {
+          status: "fail",
+          message: "Item not found in cart",
+        },
+        res
+      );
       return;
     }
 
@@ -114,15 +143,19 @@ const getCart = asyncHandler(async (req, res) => {
   try {
     const cart = await Cart.findOne({ userId: id });
     if (!cart) {
-      sendResponseError(404, {
-        status: "fail",
-        message: "Cart not found",
-      }, res);
+      sendResponseError(
+        404,
+        {
+          status: "fail",
+          message: "Cart not found",
+        },
+        res
+      );
       return;
     }
 
-    // Calculate total amount
-    cart.totalAmount = cart.items.reduce(
+    // calculate total amount
+    cart.totalAmount = cart.itemsCart.reduce(
       (acc, item) => acc + item.quantity * item.price,
       0
     );
@@ -131,49 +164,54 @@ const getCart = asyncHandler(async (req, res) => {
 
     res.status(200).json(cart);
   } catch (error) {
-    sendResponseError(500, {
-      status: "fail",
-      message: error.message,
-    }, res);
+    sendResponseError(
+      500,
+      {
+        status: "fail",
+        message: error.message,
+      },
+      res
+    );
   }
 });
 
 const deleteItemCart = asyncHandler(async (req, res) => {
-  const { userId, productId } = req.body;
-
+  const { id } = req.params;
+  const { itemsCartId } = req.body;
   try {
-    const cart = await Cart.findOne({ userId });
-
+    const cart = await Cart.findById(id);
     if (!cart) {
-      sendResponseError(404, {
-        status: "fail",
-        message: "Cart not found",
-      }, res);
+      sendResponseError(404, "Cart not found", res);
+      return;
+    }
+    
+    const item = cart.itemsCart.find(
+      (item) => item._id.toString() === itemsCartId
+    );
+
+    if (!item) {
+      sendResponseError(404, "Item not found in cart", res);
       return;
     }
 
-    cart.items = cart.items.filter(
-      (item) => item.product.toString() !== productId
-    );
+    cart.itemsCart.splice(cart.itemsCart.indexOf(item), 1);
 
-    cart.totalAmount = cart.items.reduce(
+    cart.totalAmount = cart.itemsCart.reduce(
       (acc, item) => acc + item.quantity * item.price,
       0
     );
 
     await cart.save();
 
-    res.status(200).json({
-      status: "success",
-      message: "Item deleted successfully",
-      cart,
-    });
+    res.status(200).json(cart);
+
   } catch (error) {
     sendResponseError(500, {
       status: "fail",
       message: error.message,
     }, res);
   }
+
 });
 
 const deleteCart = asyncHandler(async (req, res) => {
@@ -196,10 +234,105 @@ const deleteCart = asyncHandler(async (req, res) => {
   }
 });
 
+const incrementQuantity = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { productId } = req.body;
+  try {
+    const cart = await Cart.findById(id);
+    
+    if (!cart) {
+      sendResponseError(404, "Cart not found", res);
+      return;
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      sendResponseError(404, "Product not found", res);
+      return;
+    }
+
+
+    const item = cart.itemsCart.find(
+      (item) => item.productId.toString() === productId
+    );
+
+    if (!item) {
+      sendResponseError(404, "Item not found in cart", res);
+      return;
+    }
+
+    item.quantity += 1;
+    cart.totalAmount = cart.itemsCart.reduce(
+      (acc, item) => acc + item.quantity * item.price,
+      0
+    );
+    await cart.save();
+
+    res.status(200).json(cart);
+  } catch (error) {
+    sendResponseError(500, error.message, res);
+  }
+});
+
+const decrementQuantity = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { productId } = req.body;
+  try {
+    const cart = await Cart.findById(id);
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      sendResponseError(404, "Product not found", res);
+      return;
+    }
+
+    if (!cart) {
+      sendResponseError(404, "Cart not found", res);
+      return;
+    }
+
+    const item = cart.itemsCart.find(
+      (item) => item.productId.toString() === productId
+    );
+
+    if (!item) {
+      sendResponseError(404, "Item not found in cart", res);
+      return;
+    }
+
+    item.quantity -= 1;
+    cart.totalAmount = cart.itemsCart.reduce(
+      (acc, item) => acc + item.quantity * item.price,
+      0
+    );
+
+    if (item.quantity === 0) {
+      cart.itemsCart.splice(cart.itemsCart.indexOf(item), 1);
+    }
+    await cart.save();
+
+    res.status(200).json(cart);
+  } catch (error) {
+    sendResponseError(
+      500,
+      {
+        status: "fail",
+        message: error.message,
+      },
+      res
+    );
+  }
+});
+
 module.exports = {
   addToCart,
   updateQuantityCart,
   getCart,
   getCartByIdCart,
   deleteItemCart,
+  incrementQuantity,
+  decrementQuantity,
+
 };

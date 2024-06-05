@@ -4,6 +4,8 @@ const {
   getCart,
   updateQuantityCart,
   deleteItemCart,
+  incrementQuantity,
+  decrementQuantity,
 } = require("../controller/cartController");
 const { verifyUser } = require("../middleware/authMiddleware");
 
@@ -15,6 +17,10 @@ router.put("/:id", [verifyUser], updateQuantityCart);
 
 router.get("/user/:id", [verifyUser], getCart);
 
-router.delete("/remove", [verifyUser], deleteItemCart);
+router.put("/increment/:id", [verifyUser], incrementQuantity);
+
+router.put("/decrement/:id", [verifyUser], decrementQuantity);
+
+router.delete("/remove/:id", [verifyUser], deleteItemCart);
 
 module.exports = router;
