@@ -6,8 +6,7 @@ const { sendResponseError } = require("../middleware/middleware");
 const asyncHandler = require("express-async-handler");
 
 const createOrder = asyncHandler(async (req, res) => {
-  const { userId, productId, totalAmount, shippingAddress, quantity } =
-    req.body;
+  const { userId, productId, totalAmount, shippingAddress, quantity } = req.body;
 
   try {
     const user = await User.findById(userId);
@@ -52,7 +51,7 @@ const createOrder = asyncHandler(async (req, res) => {
       return;
     }
 
-    const item = cart.items.find(
+    const item = cart.itemsCart.find(
       (item) => item.productId.toString() === productId
     );
 
@@ -62,6 +61,7 @@ const createOrder = asyncHandler(async (req, res) => {
         {
           status: "fail",
           message: "Item not found in cart",
+          data: {},
         },
         res
       );
@@ -71,19 +71,33 @@ const createOrder = asyncHandler(async (req, res) => {
     const order = await Order.findOne({ userId });
 
     if (!order) {
-      order = new Order({
-        userId,
-        orderItems: [{
-            
-        }],
-      });
+      sendResponseError(
+        404,
+        {
+          status: "fail",
+          message: "Order not found",
+          data: {},
+        },
+        res
+      );
+      return;
     }
+
+    
+
+
+
+  
+
+
+
   } catch (err) {
     sendResponseError(
       500,
       {
         status: "fail",
         message: err.message,
+        stack: err.stack,
       },
       res
     );
@@ -91,3 +105,7 @@ const createOrder = asyncHandler(async (req, res) => {
 });
 
 const updateOrder = asyncHandler(async (req, res) => {});
+
+
+
+module.exports = { createOrder, updateOrder };

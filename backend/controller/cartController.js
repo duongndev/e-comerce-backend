@@ -334,5 +334,4 @@ module.exports = {
   deleteItemCart,
   incrementQuantity,
   decrementQuantity,
-
 };
