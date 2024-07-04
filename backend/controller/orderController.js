@@ -7,12 +7,34 @@ const { sendResponseError } = require("../middleware/middleware");
 const asyncHandler = require("express-async-handler");
 
 const createOrder = asyncHandler(async (req, res) => {
-  const { userId, status, paymentMethod } = req.body;
+  const { userId, productId, totalAmount, shippingAddress, quantity } = req.body;
 
   try {
     const user = await User.findById(userId);
+
     if (!user) {
-      sendResponseError(404, "User not found", res);
+      sendResponseError(
+        404,
+        {
+          status: "fail",
+          message: "User not found",
+        },
+        res
+      );
+      return;
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      sendResponseError(
+        404,
+        {
+          status: "fail",
+          message: "Product not found",
+        },
+        res
+      );
       return;
     }
 
@@ -30,45 +52,46 @@ const createOrder = asyncHandler(async (req, res) => {
       return;
     }
 
-    const address = await Address.findOne({ userId });
+    const item = cart.itemsCart.find(
+      (item) => item.productId.toString() === productId
+    );
 
-    if (!address) {
+    if (!item) {
       sendResponseError(
         404,
         {
           status: "fail",
-          message: "Address not found",
+          message: "Item not found in cart",
+          data: {},
         },
         res
       );
       return;
     }
 
-    const order = new Order({
-      userId,
-      orderItems: cart.itemsCart.map((item) => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-      })),
-      totalAmount: cart.totalAmount,
-      shippingAddress: address.addressLine,
-      phoneNumber: address.phoneNumber,
-      status,
-      paymentMethod,
-    });
+    const order = await Order.findOne({ userId });
 
-    await order.save();
+    if (!order) {
+      sendResponseError(
+        404,
+        {
+          status: "fail",
+          message: "Order not found",
+          data: {},
+        },
+        res
+      );
+      return;
+    }
 
-    await Cart.deleteOne({ userId });
+    
 
-    res.status(200).json({
-      status: "success",
-      message: "Order created successfully",
-      data: order,
-    });
+
+
+  
+
+
+
   } catch (err) {
     sendResponseError(
       500,
@@ -82,101 +105,8 @@ const createOrder = asyncHandler(async (req, res) => {
   }
 });
 
-const updateOrder = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
+const updateOrder = asyncHandler(async (req, res) => {});
 
-  try {
-    const order = await Order.findById(id);
-    if (!order) {
-      sendResponseError(404, "Order not found", res);
-      return;
-    }
 
-    
 
-    if (!status) {
-      sendResponseError(400, "Status is required", res);
-      return;
-    }
-
-    order.status = status;
-
-    await order.save();
-
-    res.status(200).json({
-      status: "success",
-      message: "Order updated successfully",
-      data: order,
-    });
-  } catch (error) {
-    sendResponseError(500, error.message, res);
-  }
-});
-
-const getOrderById = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  try {
-    const order = await Order.findById(id);
-    if (!order) {
-      sendResponseError(404, "Order not found", res);
-      return;
-    }
-
-    res.json(order);
-  } catch (error) {
-    sendResponseError(500, error.message, res);
-  }
-});
-
-const getAllOrders = asyncHandler(async (req, res) => {
-  try {
-    const orders = await Order.find();
-    res.json(orders);
-  } catch (error) {
-    sendResponseError(500, error.message, res);
-  }
-});
-
-const getAllOrdersByUserId = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  try {
-    const orders = await Order.find({ userId: id });
-
-    if (!orders) {
-      sendResponseError(404, "Order not found", res);
-      return;
-    }
-
-    res.status(200).json(orders);
-  } catch (error) {
-    sendResponseError(500, error.message, res);
-  }
-});
-
-const getOrdersByStatusOfUser = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.query;
-
-  try {
-    const orders = await Order.find({ userId: id, status: status });
-
-    if (!orders) {
-      sendResponseError(404, "Order not found", res);
-      return;
-    }
-
-    res.status(200).json(orders);
-  } catch (error) {
-    sendResponseError(500, error.message, res);
-  }
-});
-
-module.exports = {
-  createOrder,
-  updateOrder,
-  getOrderById,
-  getAllOrders,
-  getAllOrdersByUserId,
-  getOrdersByStatusOfUser,
-};
+module.exports = { createOrder, updateOrder };
