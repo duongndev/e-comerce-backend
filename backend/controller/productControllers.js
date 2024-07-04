@@ -149,7 +149,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
 
 const getAllProducts = asyncHandler(async (req, res) => {
   try {
-    const products = await Product.find({});
+    const products = await Product.find({}).populate("categoryId");
     res.status(200).json({
       status: "success",
       message: "Get all products successfully",

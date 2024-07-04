@@ -18,9 +18,10 @@ const UserSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
-    isAdmin: {
-      type: Boolean,
-      default: false,
+    role: {
+      type: String,
+      enum: ["user", "admin", "superAdmin", "rider"],
+      default: "user",
     },
     avatarUrl: {
       public_id: {

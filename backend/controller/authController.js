@@ -56,11 +56,11 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     const token = newToken(user);
-
     res.status(200).json({
       status: true,
-      message: "User login successfully",
+      message: `${user.role} login successfully`,
       userId: user._id,
+      role: user.role,
       token,
     });
   } catch (error) {

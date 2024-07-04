@@ -30,7 +30,7 @@ const userRoutes = require("./routes/userRoutes");
 const cartRoutes = require("./routes/cartRouter");
 const authRoutes = require("./routes/authRouter");
 const orderRoutes = require("./routes/orderRouter");
-
+const addressesRoutes = require("./routes/addressRouter");
 const api = "/api";
 
 app.use(`/categories`, categoryRoutes);
@@ -39,6 +39,7 @@ app.use(`/users`, userRoutes);
 app.use(`/cart`, cartRoutes);
 app.use(`/auth`, authRoutes);
 app.use(`/orders`, orderRoutes);
+app.use(`/addresses`, addressesRoutes);
 
 app.get("*", (req, res) => {
   res.json({ message: "API running..." });

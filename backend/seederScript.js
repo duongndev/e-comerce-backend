@@ -6,6 +6,7 @@ const Product = require('./models/Product')
 const Category = require('./models/Category')
 const Users = require('./models/User')
 
+
 connectDB()
 
 const importData = async () => {
@@ -14,7 +15,9 @@ const importData = async () => {
     // await Category.insertMany(categories)
 
     // await Product.deleteMany({})
+    await Users.deleteMany({})
     await Users.insertMany(users)
+    
 
 
     console.log('Data Import Success')

@@ -1,3 +1,5 @@
+const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 const categories = [
   {
@@ -21,17 +23,16 @@ const categories = [
 
 const users = [
   {
-    fullName: "admin",
-    email: "admin@gmail.com",
-    password: "admin123",
-    isAdmin: true,
+    fullName: "Super Admin",
+    email: "superadmin@gmail.com",
+    password: "superadmin123",
+    role: "superAdmin",
     avatarUrl: {
       public_id: "",
-      secure_url:"",
+      secure_url: "",
     },
-
     address: {
-      street: "",
+      street: "Street",
       city: "City",
       state: "State",
       country: "Country",
@@ -39,10 +40,45 @@ const users = [
     phoneNumber: "1234567890",
   },
   {
-    fullName: "user",
+    fullName: "Admin",
+    email: "admin@gmail.com",
+    password: "admin123",
+    role: "admin",
+    avatarUrl: {
+      public_id: "",
+      secure_url: "",
+    },
+
+    address: {
+      street: "Street",
+      city: "City",
+      state: "State",
+      country: "Country",
+    },
+    phoneNumber: "1234567890",
+  },
+  {
+    fullName: "Rider",
+    email: "rider@gmail.com",
+    password: "rider123",
+    role: "rider",
+    avatarUrl: {
+      public_id: "",
+      secure_url: "",
+    },
+    address: {
+      street: "Street",
+      city: "City",
+      state: "State",
+      country: "Country",
+    },
+    phoneNumber: "1234567890",
+  },
+  {
+    fullName: "User",
     email: "user@gmail.com",
     password: "user123",
-    isAdmin: false,
+    role: "user",
     avatarUrl: {
       public_id: "",
       secure_url: "",
@@ -56,6 +92,19 @@ const users = [
     phoneNumber: "1234567890",
   },
 ];
+
+
+
+const salt = bcrypt.genSaltSync(10);
+
+const hashPassword = (password) => {
+  return bcrypt.hashSync(password, salt);
+};
+
+for (const user of users) {
+  user.password = hashPassword(user.password);
+  
+}
 
 module.exports = {
   categories,

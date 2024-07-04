@@ -30,11 +30,15 @@ const addToCart = asyncHandler(async (req, res) => {
       return;
     }
 
+
     const item = cart.itemsCart.find(
       (item) => item.productId.toString() === productId
     );
 
+   
+    
     if (item) {
+      // update quantity
       item.quantity = item.quantity + quantity;
     } else {
       // add item to cart

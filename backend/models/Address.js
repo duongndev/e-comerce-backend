@@ -6,6 +6,10 @@ const addressSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    title: {
+      type: String,
+      required: true,
+    },
     addressLine: {
       type: String,
       required: true,
@@ -24,6 +28,10 @@ const addressSchema = new mongoose.Schema(
     },
     pincode: {
       type: Number,
+      required: true,
+    },
+    phoneNumber: {
+      type: String,
       required: true,
     },
   },
