@@ -5,6 +5,7 @@ const {
   updateAddresses,
   deleteAddresses,
   getAddressById,
+  getAddressesByUserId,
 } = require("../controller/addressController");
 const { 
     verifyUser,
@@ -19,5 +20,7 @@ router.put("/:id", verifyUser, updateAddresses);
 router.delete("/:id", verifyUser, deleteAddresses);
 
 router.get("/:id", verifyUser, getAddressById);
+
+router.get("/user/:id", verifyUser, getAddressesByUserId);
 
 module.exports = router;

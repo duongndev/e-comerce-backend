@@ -62,6 +62,12 @@ const createOrder = asyncHandler(async (req, res) => {
 
     await order.save();
 
+    for (const item of cart.itemsCart) {
+      await Product.findByIdAndUpdate(item.productId, {
+        $inc: { countInStock: -item.quantity }
+      });
+    }
+
     await Cart.deleteOne({ userId });
 
     res.status(200).json({

@@ -124,10 +124,25 @@ const getAddressById = asyncHandler(async (req, res) => {
   }
 });
 
+const getAddressesByUserId = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    const addresses = await Address.find({ userId: id });
+    if (!addresses) {
+      sendResponseError(404, "Address not found", res);
+      return;
+    } 
+    res.status(200).json(addresses);
+  } catch (error) {
+    sendResponseError(res, 500, error.message);
+  }
+});
+
 module.exports = {
   getAllAddresses,
   createdAddresses,
   updateAddresses,
   deleteAddresses,
   getAddressById,
+  getAddressesByUserId,
 };
