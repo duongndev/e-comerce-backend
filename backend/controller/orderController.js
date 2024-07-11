@@ -7,7 +7,7 @@ const { sendResponseError } = require("../middleware/middleware");
 const asyncHandler = require("express-async-handler");
 
 const createOrder = asyncHandler(async (req, res) => {
-  const { userId, status, paymentMethod } = req.body;
+  const { userId, paymentMethod, addressLine, phoneNumber } = req.body;
 
   try {
     const user = await User.findById(userId);
@@ -54,9 +54,8 @@ const createOrder = asyncHandler(async (req, res) => {
         image: item.image,
       })),
       totalAmount: cart.totalAmount,
-      shippingAddress: address.addressLine,
-      phoneNumber: address.phoneNumber,
-      status,
+      shippingAddress: addressLine,
+      phoneNumber: phoneNumber,
       paymentMethod,
     });
 
