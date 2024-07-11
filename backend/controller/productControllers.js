@@ -53,11 +53,7 @@ const createProduct = asyncHandler(async (req, res) => {
       imageUrls: imageUrls,
     });
     await product.save();
-    res.status(201).json({
-      status: "success",
-      message: "Product created successfully",
-      data: product,
-    });
+    res.status(201).json(product);
   } catch (error) {
     sendResponseError(500, error.message, res);
   }
@@ -114,11 +110,7 @@ const updateProduct = asyncHandler(async (req, res) => {
       },
       { new: true }
     );
-    res.status(200).json({
-      status: "success",
-      message: "Product updated successfully",
-      data: updatedProduct,
-    });
+    res.status(200).json(updatedProduct);
   } catch (error) {
     sendResponseError(500, error.message, res);
   }
@@ -150,11 +142,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
 const getAllProducts = asyncHandler(async (req, res) => {
   try {
     const products = await Product.find({}).populate("categoryId");
-    res.status(200).json({
-      status: "success",
-      message: "Get all products successfully",
-      data: products,
-    });
+    res.status(200).json(products);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -173,11 +161,7 @@ const getProductById = asyncHandler(async (req, res) => {
       return;
     }
 
-    res.status(200).json({
-      status: "success",
-      message: "Get product successfully",
-      data: product,
-    });
+    res.status(200).json(product);
   } catch (error) {
     sendResponseError(500, `Error ${error.message}`, res);
   }
@@ -196,7 +180,7 @@ const getProductByCategoryId = asyncHandler(async (req, res) => {
       return;
     }
     
-    const products = await Product.find({ categoryId: category._id });
+    const products = await Product.find({ categoryId: category._id }).populate("categoryId");
 
     if (!products) {
       sendResponseError(404,{
@@ -206,11 +190,7 @@ const getProductByCategoryId = asyncHandler(async (req, res) => {
       return;
     }
   
-    res.status(200).json({
-      status: "success",
-      message: "Get all products successfully",
-      data: products,
-    });
+    res.status(200).json(products);
   } catch (error) {
     sendResponseError(500, {
       status: "fail",

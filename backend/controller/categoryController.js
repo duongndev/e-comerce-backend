@@ -36,11 +36,7 @@ const createCategory = asyncHandler(async (req, res) => {
       imageUrl: imageUrl,
     });
     await category.save();
-    res.json({
-      status: "success",
-      message: "Category created successfully",
-      data: category,
-    });
+    res.status(201).json(category);
   } catch (error) {
     sendResponseError(500, error.message, res);
   }
@@ -50,11 +46,7 @@ const getAllCategories = async (req, res) => {
   try {
     const categories = await Category.find({});
 
-    res.json({
-      status: "success",
-      message: "Categories fetched successfully",
-      data: categories,
-    });
+    res.json(categories);
   } catch (error) {
     res.json({
       status: "fail",
@@ -67,11 +59,7 @@ const getCategoryById = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
     const category = await Category.findById(id);
-    res.json({
-      status: "success",
-      message: "Category fetched successfully",
-      data: category,
-    });
+    res.json(category);
   } catch (error) {
     res.json({
       status: "fail",
@@ -116,11 +104,7 @@ const updateCategory = asyncHandler(async (req, res) => {
       { new: true }
     );
     await category.save();
-    res.json({
-      status: "success",
-      message: "Category updated successfully",
-      data: category,
-    });
+    res.json(category);
   } catch (error) {
     sendResponseError(500, error.message, res);
   }
