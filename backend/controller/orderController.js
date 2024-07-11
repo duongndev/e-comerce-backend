@@ -70,11 +70,7 @@ const createOrder = asyncHandler(async (req, res) => {
 
     await Cart.deleteOne({ userId });
 
-    res.status(200).json({
-      status: "success",
-      message: "Order created successfully",
-      data: order,
-    });
+    res.status(200).json(order);
   } catch (err) {
     sendResponseError(
       500,
@@ -108,11 +104,7 @@ const updateOrder = asyncHandler(async (req, res) => {
 
     await order.save();
 
-    res.status(200).json({
-      status: "success",
-      message: "Order updated successfully",
-      data: order,
-    });
+    res.status(200).json(order);
   } catch (error) {
     sendResponseError(500, error.message, res);
   }
