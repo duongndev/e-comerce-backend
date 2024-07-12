@@ -72,6 +72,7 @@ const createOrder = asyncHandler(async (req, res) => {
     req.io.emit("newOrder", {
       orderId: order._id,
       userId: order.userId,
+      orderItems: order.orderItems,
       totalAmount: order.totalAmount,
     });
 
