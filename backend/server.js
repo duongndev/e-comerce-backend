@@ -6,6 +6,12 @@ const { notFound, errorHandler } = require("./middleware/middleware");
 const cloudinary = require("cloudinary");
 const logger = require("morgan");
 const bodyParser = require("body-parser");
+
+const http = require('http');
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+const io = socketIo(server);
+
 require("dotenv").config();
 
 connectDB();
@@ -44,9 +50,21 @@ app.use(`/addresses`, addressesRoutes);
 app.get("*", (req, res) => {
   res.json({ message: "API running..." });
 });
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Socket.io
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
