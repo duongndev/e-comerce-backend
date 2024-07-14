@@ -68,14 +68,6 @@ const createOrder = asyncHandler(async (req, res) => {
     }
 
     await Cart.deleteOne({ userId });
-
-    req.io.emit("newOrder", {
-      orderId: order._id,
-      userId: order.userId,
-      orderItems: order.orderItems,
-      totalAmount: order.totalAmount,
-    });
-
     res.status(200).json(order);
   } catch (err) {
     sendResponseError(

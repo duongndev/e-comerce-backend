@@ -47,12 +47,19 @@ app.use(`/auth`, authRoutes);
 app.use(`/orders`, orderRoutes);
 app.use(`/addresses`, addressesRoutes);
 
-app.get("*", (req, res) => {
-  res.json({ message: "API running..." });
-});
+// app.get("*", (req, res) => {
+//   res.json({ message: "API running..." });
+// });
 app.use((req, res, next) => {
   req.io = io;
   next();
+});
+app.get("/check-auth", (req, res) => {
+  if (req.admin) {
+    res.json({ isAuthenticated: true, admin: req.admin });
+  } else {
+    res.json({ isAuthenticated: false });
+  }
 });
 
 app.use(notFound);
@@ -63,8 +70,12 @@ server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 // Socket.io
 io.on('connection', (socket) => {
-  console.log('a user connected');
+  console.log('user connected');
   socket.on('disconnect', () => {
     console.log('user disconnected');
+  });
+
+  socket.on('newOrder', (data) => {
+    console.log(data);
   });
 });
