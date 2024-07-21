@@ -6,9 +6,10 @@ const { notFound, errorHandler } = require("./middleware/middleware");
 const cloudinary = require("cloudinary");
 const logger = require("morgan");
 const bodyParser = require("body-parser");
+const session = require("express-session");
 
-const http = require('http');
-const socketIo = require('socket.io');
+const http = require("http");
+const socketIo = require("socket.io");
 const server = http.createServer(app);
 const io = socketIo(server);
 
@@ -30,6 +31,14 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(logger("dev"));
 
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRouter");
 const userRoutes = require("./routes/userRoutes");
@@ -37,6 +46,7 @@ const cartRoutes = require("./routes/cartRouter");
 const authRoutes = require("./routes/authRouter");
 const orderRoutes = require("./routes/orderRouter");
 const addressesRoutes = require("./routes/addressRouter");
+const statisticRouter = require("./routes/statisticsRouter");
 const api = "/api";
 
 app.use(`/categories`, categoryRoutes);
@@ -46,6 +56,7 @@ app.use(`/cart`, cartRoutes);
 app.use(`/auth`, authRoutes);
 app.use(`/orders`, orderRoutes);
 app.use(`/addresses`, addressesRoutes);
+app.use(`/statistics`, statisticRouter);
 
 // app.get("*", (req, res) => {
 //   res.json({ message: "API running..." });
@@ -54,11 +65,13 @@ app.use((req, res, next) => {
   req.io = io;
   next();
 });
+
+// Admin authentication
 app.get("/check-auth", (req, res) => {
-  if (req.admin) {
-    res.json({ isAuthenticated: true, admin: req.admin });
+  if (req.session.isAdmin) {
+    res.json({ isAdmin: true });
   } else {
-    res.json({ isAuthenticated: false });
+    res.json({ isAdmin: false });
   }
 });
 
@@ -68,14 +81,14 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-// Socket.io
-io.on('connection', (socket) => {
-  console.log('user connected');
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+// Socket.io  
+io.on("connection", (socket) => {
+  console.log("user connected");
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
   });
 
-  socket.on('newOrder', (data) => {
+  socket.on("newOrder", (data) => {
     console.log(data);
   });
 });

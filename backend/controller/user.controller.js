@@ -13,8 +13,13 @@ const getAllUsers = asyncHandler(async (req, res) => {
 });
 
 const getProfile = async (req, res) => {
-  res.status(200).json(req.user);
+  if (req.user && req.user.role === "admin") {
+    res.json({ isAuthenticated: true, user: req.user });
+  } else {
+    res.json({ isAuthenticated: false, user: req.user });
+  }
 };
+
 module.exports = { 
   getAllUsers, 
   getProfile 

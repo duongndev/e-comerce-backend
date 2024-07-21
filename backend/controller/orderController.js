@@ -63,7 +63,7 @@ const createOrder = asyncHandler(async (req, res) => {
 
     for (const item of cart.itemsCart) {
       await Product.findByIdAndUpdate(item.productId, {
-        $inc: { countInStock: -item.quantity }
+        $inc: { countInStock: -item.quantity },
       });
     }
 
@@ -166,6 +166,22 @@ const getOrdersByStatusOfUser = asyncHandler(async (req, res) => {
   }
 });
 
+const getOrdersByStatus = asyncHandler(async (req, res) => {
+  const { status } = req.query;
+  try {
+    const orders = await Order.find({ status: status });
+  
+    if (!orders) {
+      sendResponseError(404, "Order not found", res);
+      return;
+    }
+
+    res.status(200).json(orders);
+  } catch (error) {
+    sendResponseError(500, error.message, res);
+  }
+});
+
 module.exports = {
   createOrder,
   updateOrder,
@@ -173,4 +189,5 @@ module.exports = {
   getAllOrders,
   getAllOrdersByUserId,
   getOrdersByStatusOfUser,
+  getOrdersByStatus,
 };
