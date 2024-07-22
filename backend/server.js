@@ -31,13 +31,13 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(logger("dev"));
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: true,
+//   })
+// );
 
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRouter");
@@ -58,9 +58,9 @@ app.use(`/orders`, orderRoutes);
 app.use(`/addresses`, addressesRoutes);
 app.use(`/statistics`, statisticRouter);
 
-// app.get("*", (req, res) => {
-//   res.json({ message: "API running..." });
-// });
+app.get("*", (req, res) => {
+  res.json({ message: "API running..." });
+});
 app.use((req, res, next) => {
   req.io = io;
   next();
