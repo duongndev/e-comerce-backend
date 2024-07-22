@@ -15,6 +15,21 @@ const getStatisticsDaily = asyncHandler(async (req, res) => {
   const start = startDate ? new Date(startDate) : new Date("1970-01-01");
   const end = endDate ? new Date(endDate) : new Date();
 
+  // check datetime now
+  const today = new Date();
+  if (start > today || end > today) {
+    sendResponseError(400, "Invalid date range", res);
+    return;
+  }
+
+  // check if start date is before end date
+  if (start > end) {
+    sendResponseError(400, "Start date must be before end date", res);
+    return;
+  }
+
+  // aggregate data
+  
   try {
     const results = await Order.aggregate([
       {

@@ -11,7 +11,7 @@ const {
 const { verifyUser, verifyAdmin } = require("../middleware/authMiddleware");
 
 
-router.get("/", [verifyAdmin], getAllOrders);
+router.get("/", getAllOrders);
 router.put("/:id", [verifyAdmin], updateOrder);
 
 router.get("/status", getOrdersByStatus);
