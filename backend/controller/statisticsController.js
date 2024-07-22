@@ -28,8 +28,8 @@ const getStatisticsDaily = asyncHandler(async (req, res) => {
       {
         $group: {
           _id: {
-            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-            time: { $dateToString: { format: "%H:%M:%S", date: "$createdAt" } },
+            date: { $dateToString: { format: "%d-%m-%Y", date: "$createdAt" } },
+            time: { $dateToString: { format: "%H:%M", date: "$createdAt" } },
           },
           totalAmount: { $sum: "$totalAmount" },
           totalOrders: { $sum: 1 },
