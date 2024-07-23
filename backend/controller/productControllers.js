@@ -43,7 +43,7 @@ const createProduct = asyncHandler(async (req, res) => {
       sendResponseError(404, "Category not found", res);
       return;
     }
-    
+
     const product = await Product.create({
       name_product,
       description,
@@ -141,8 +141,23 @@ const deleteProduct = asyncHandler(async (req, res) => {
 
 const getAllProducts = asyncHandler(async (req, res) => {
   try {
-    const products = await Product.find({}).populate("categoryId");
-    res.status(200).json(products);
+    let { page = 1, limit = 2 } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const items = await Product.find({})
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const totalItems = await Product.countDocuments({});
+    const totalPages = Math.ceil(totalItems / limit);
+
+    res.json({
+      products: items,
+      totalPages,
+      currentPage: page
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -151,13 +166,19 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
 const getProductById = asyncHandler(async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate("categoryId");
+    const product = await Product.findById(req.params.id).populate(
+      "categoryId"
+    );
 
     if (!product) {
-      sendResponseError(404, {
-        status: "fail",
-        message: "Product not found",
-      }, res);
+      sendResponseError(
+        404,
+        {
+          status: "fail",
+          message: "Product not found",
+        },
+        res
+      );
       return;
     }
 
@@ -169,33 +190,46 @@ const getProductById = asyncHandler(async (req, res) => {
 
 const getProductByCategoryId = asyncHandler(async (req, res) => {
   try {
-
     const category = await Category.findOne({ nameCate: req.params.name });
 
     if (!category) {
-      sendResponseError(404,{
-        status: "fail",
-        message: "Category not found",
-      }, res);
+      sendResponseError(
+        404,
+        {
+          status: "fail",
+          message: "Category not found",
+        },
+        res
+      );
       return;
     }
-    
-    const products = await Product.find({ categoryId: category._id }).populate("categoryId");
+
+    const products = await Product.find({ categoryId: category._id }).populate(
+      "categoryId"
+    );
 
     if (!products) {
-      sendResponseError(404,{
-        status: "fail",
-        message: "Products not found",
-      }, res);
+      sendResponseError(
+        404,
+        {
+          status: "fail",
+          message: "Products not found",
+        },
+        res
+      );
       return;
     }
-  
+
     res.status(200).json(products);
   } catch (error) {
-    sendResponseError(500, {
-      status: "fail",
-      message: error.message,
-    }, res);
+    sendResponseError(
+      500,
+      {
+        status: "fail",
+        message: error.message,
+      },
+      res
+    );
   }
 });
 

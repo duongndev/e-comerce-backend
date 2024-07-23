@@ -10,6 +10,12 @@ const {
   endOfYear,
 } = require("date-fns");
 
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const tomorrow = new Date(today);
+tomorrow.setDate(tomorrow.getDate() + 1);
+
 const getStatisticsDaily = asyncHandler(async (req, res) => {
   const { startDate, endDate } = req.query;
   const start = startDate ? new Date(startDate) : new Date("1970-01-01");
@@ -29,9 +35,8 @@ const getStatisticsDaily = asyncHandler(async (req, res) => {
   }
 
   // aggregate data
-  
   try {
-    const results = await Order.aggregate([
+    const products = await Order.aggregate([
       {
         $match: {
           createdAt: {
@@ -56,7 +61,37 @@ const getStatisticsDaily = asyncHandler(async (req, res) => {
       },
     ]);
 
-    res.json(results);
+    // Get the most purchased products of the day
+    const mostPurchasedProducts = await Order.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: startOfDay(start),
+            $lte: endOfDay(end),
+          },
+        },
+      },
+      {
+        $unwind: "$orderItems",
+      },
+      {
+        $group: {
+          _id: "$orderItems.productId",
+          name: { $first: "$orderItems.name" },
+          price: { $first: "$orderItems.price" },
+          image: { $first: "$orderItems.image" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+      {
+        $limit: 5,
+      },
+    ]);
+
+    res.json({ products, mostPurchasedProducts });
   } catch (error) {
     sendResponseError(500, error.message, res);
   }
@@ -68,7 +103,7 @@ const getStatisticsMonthly = asyncHandler(async (req, res) => {
   const end = endDate ? new Date(endDate) : new Date();
 
   try {
-    const results = await Order.aggregate([
+    const products = await Order.aggregate([
       {
         $match: {
           createdAt: {
@@ -86,7 +121,12 @@ const getStatisticsMonthly = asyncHandler(async (req, res) => {
           totalAmount: { $sum: "$totalAmount" },
           totalOrders: { $sum: 1 },
           totalRevenue: { $push: "$orderItems.price" },
-          days: { $push: "$createdAt" },
+          days: { $push: {
+            $dateToString: {
+              format: "%d-%m-%Y",
+              date: "$createdAt"
+            }
+          } },
         },
       },
       {
@@ -94,7 +134,37 @@ const getStatisticsMonthly = asyncHandler(async (req, res) => {
       },
     ]);
 
-    res.json(results);
+    // Get the most purchased products of the month
+    const mostPurchasedProducts = await Order.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: startOfMonth(start),
+            $lte: endOfMonth(end),
+          },
+        },
+      },
+      {
+        $unwind: "$orderItems",
+      },
+      {
+        $group: {
+          _id: "$orderItems.productId",
+          name: { $first: "$orderItems.name" },
+          price: { $first: "$orderItems.price" },
+          image: { $first: "$orderItems.image" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+      {
+        $limit: 5,
+      },
+    ]);
+
+    res.json({ products, mostPurchasedProducts });
   } catch (error) {
     sendResponseError(500, error.message, res);
   }
@@ -106,7 +176,7 @@ const getStatisticsYearly = asyncHandler(async (req, res) => {
     const end = endDate? new Date(endDate) : new Date();
 
     try {
-      const results = await Order.aggregate([
+      const products = await Order.aggregate([
         {
           $match: {
             createdAt: {
@@ -123,7 +193,12 @@ const getStatisticsYearly = asyncHandler(async (req, res) => {
             totalAmount: { $sum: "$totalAmount" },
             totalOrders: { $sum: 1 },
             totalRevenue: { $push: "$orderItems.price" },
-            months: { $push: "$createdAt" },
+            months: { $push: {
+              $dateToString: {
+                format: "%m-%Y",
+                date: "$createdAt"
+              }
+            }}
           },
         },
         {
@@ -131,7 +206,37 @@ const getStatisticsYearly = asyncHandler(async (req, res) => {
         },
       ]);
 
-      res.json(results);
+      // Get the most purchased products of the year
+      const mostPurchasedProducts = await Order.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: startOfYear(start),
+              $lte: endOfYear(end),
+            },
+          },
+        },
+        {
+          $unwind: "$orderItems",
+        },
+        {
+          $group: {
+            _id: "$orderItems.productId",
+            name: { $first: "$orderItems.name" },
+            price: { $first: "$orderItems.price" },
+            image: { $first: "$orderItems.image" },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { count: -1 },
+        },
+        {
+          $limit: 10,
+        },
+      ]);
+
+      res.json({ products, mostPurchasedProducts });
     } catch (error) {
       sendResponseError(500, error.message, res);
     }
