@@ -26,12 +26,13 @@ const productSchema = mongoose.Schema(
     },
     reviews: {
       type: Array,
+      default: [],
     },
     size: {
-      type: String,
+      type: Array,
     },
-    color: {
-      type: String,
+    colors: {
+      type: Array,
     },
   },
   {

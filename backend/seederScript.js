@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const {users} = require('./data/products')
+const {users, products} = require('./data/products')
 const {connectDB} = require('./config/db')
 const Product = require('./models/Product')
 const Category = require('./models/Category')
@@ -15,11 +15,10 @@ const importData = async () => {
     // await Category.insertMany(categories)
 
     // await Product.deleteMany({})
-    await Users.deleteMany({})
-    await Users.insertMany(users)
+    await Product.insertMany(products)
+    // await Users.deleteMany({})
+    // await Users.insertMany(users)
     
-
-
     console.log('Data Import Success')
 
     process.exit()

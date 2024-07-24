@@ -4,6 +4,7 @@ const fs = require("fs/promises");
 const { sendResponseError } = require("../middleware/middleware");
 const asyncHandler = require("express-async-handler");
 const Category = require("../models/Category");
+const Review = require("../models/Review");
 
 const createProduct = asyncHandler(async (req, res) => {
   const { name_product, description, price, categoryId, countInStock } =
@@ -141,12 +142,13 @@ const deleteProduct = asyncHandler(async (req, res) => {
 
 const getAllProducts = asyncHandler(async (req, res) => {
   try {
-    let { page = 1, limit = 2 } = req.query;
+    let { page = 1, limit = 10 } = req.query;
 
     page = parseInt(page);
     limit = parseInt(limit);
 
     const items = await Product.find({})
+      .populate("categoryId")
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -156,7 +158,8 @@ const getAllProducts = asyncHandler(async (req, res) => {
     res.json({
       products: items,
       totalPages,
-      currentPage: page
+      currentPage: page,
+      totalItems,
     });
   } catch (error) {
     console.error(error);
@@ -182,6 +185,10 @@ const getProductById = asyncHandler(async (req, res) => {
       return;
     }
 
+    const reviews = await Review.find({ productId: req.params.id }).populate(
+      "user",
+      "name email"
+    );
     res.status(200).json(product);
   } catch (error) {
     sendResponseError(500, `Error ${error.message}`, res);
@@ -231,18 +238,6 @@ const getProductByCategoryId = asyncHandler(async (req, res) => {
       res
     );
   }
-});
-
-//
-const createProductSubCategory = asyncHandler(async (req, res) => {
-  const {
-    name_product,
-    description,
-    price,
-    categoryId,
-    idSubCategory,
-    countInStock,
-  } = req.body;
 });
 
 module.exports = {
