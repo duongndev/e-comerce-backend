@@ -48,6 +48,7 @@ const orderRoutes = require("./routes/orderRouter");
 const addressesRoutes = require("./routes/addressRouter");
 const statisticRouter = require("./routes/statisticsRouter");
 const reviewsRoutes = require("./routes/reviewRouter");
+const wishlistRoutes = require("./routes/wishlistRouter");
 const api = "/api";
 
 app.use(`/categories`, categoryRoutes);
@@ -59,6 +60,7 @@ app.use(`/orders`, orderRoutes);
 app.use(`/addresses`, addressesRoutes);
 app.use(`/statistics`, statisticRouter);
 app.use(`/reviews`, reviewsRoutes);
+app.use(`/wishlist`, wishlistRoutes);
 
 app.get("*", (req, res) => {
   res.json({ message: "API running..." });

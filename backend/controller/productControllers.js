@@ -197,6 +197,12 @@ const getProductById = asyncHandler(async (req, res) => {
 
 const getProductByCategoryId = asyncHandler(async (req, res) => {
   try {
+
+    let { page = 1, limit = 10 } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
     const category = await Category.findOne({ nameCate: req.params.name });
 
     if (!category) {
@@ -213,7 +219,12 @@ const getProductByCategoryId = asyncHandler(async (req, res) => {
 
     const products = await Product.find({ categoryId: category._id }).populate(
       "categoryId"
-    );
+    )
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+    const totalItems = await Product.countDocuments({ categoryId: category._id });
+    const totalPages = Math.ceil(totalItems / limit);
 
     if (!products) {
       sendResponseError(
@@ -227,7 +238,12 @@ const getProductByCategoryId = asyncHandler(async (req, res) => {
       return;
     }
 
-    res.status(200).json(products);
+    res.status(200).json({
+      products,
+      totalPages,
+      currentPage: page,
+      totalItems,
+    });
   } catch (error) {
     sendResponseError(
       500,

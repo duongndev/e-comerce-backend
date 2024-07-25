@@ -39,7 +39,7 @@ const createReviewProduct = asyncHandler(async (req, res) => {
     const existingReview = product.reviews.find(
       (review) =>
         review.productId.toString() === productId &&
-        review.user.toString() === userId
+        review.userId.toString() === userId
     );
 
     if (existingReview) {
@@ -60,7 +60,7 @@ const createReviewProduct = asyncHandler(async (req, res) => {
       productId,
       comment,
     });
-    product.reviews.push(review);
+    product.reviews.push(review._id);
     await review.save();
     await product.save();
     res.status(201).json(review);
@@ -215,7 +215,7 @@ const getAllReviewsProduct = asyncHandler(async (req, res) => {
 
     // paginate
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 5;
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
     const total = reviews.length;
@@ -227,8 +227,6 @@ const getAllReviewsProduct = asyncHandler(async (req, res) => {
       currentPage: page,
       totalItems: total,
     });
-
-
   } catch (error) {
     sendResponseError(500, error.message, res);
   }
