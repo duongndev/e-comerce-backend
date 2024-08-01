@@ -81,7 +81,7 @@ const getWishlist = asyncHandler(async (req, res) => {
         path: "productId",
         select: "name_product price imageUrls",
       })
-      .select("-_id productId");
+      
     if (!wishlist) {
       sendResponseError(404, "Wishlist not found", res);
       return;

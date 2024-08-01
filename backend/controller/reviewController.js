@@ -213,6 +213,15 @@ const getAllReviewsProduct = asyncHandler(async (req, res) => {
 
     product.reviews = reviews;
 
+
+    // average rating
+    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+    const averageRating = totalRating / reviews.length;
+
+    console.log("averageRating", averageRating);
+
+
+
     // paginate
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
